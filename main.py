@@ -33,8 +33,9 @@ log = logging.getLogger("enquiry-bot")
 # ----------------------------------------------------------------------------
 BASE_DIR = Path(__file__).parent
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
-GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3.8-flash")
+GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
+GROQ_MODEL = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
+GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
 WEBHOOK_SECRET = os.getenv("WEBHOOK_SECRET", "")  # letters, digits, _ and - only
 PUBLIC_URL = os.getenv("PUBLIC_URL", "").rstrip("/")  # e.g. your ngrok https URL
 ADMIN_KEY = os.getenv("ADMIN_KEY", "")  # protects /leads pages
@@ -45,7 +46,6 @@ DB_PATH = os.getenv("DB_PATH", str(BASE_DIR / "bot.db"))
 HISTORY_LIMIT = 8  # how many past messages the bot remembers per chat
 
 TG_API = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}"
-GEMINI_URL = f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_MODEL}:generateContent"
 
 FALLBACK_REPLY = (
     "Sorry, I'm having a small technical problem right now. "
@@ -246,36 +246,29 @@ async def send_telegram(chat_id, text: str) -> None:
 
 
 async def ask_gemini(history: list[tuple[str, str]], user_text: str) -> dict:
-    """One Gemini call per user message. Retries on rate limits / temporary errors."""
-    contents = [{"role": role, "parts": [{"text": text}]} for role, text in history]
-    contents.append({"role": "user", "parts": [{"text": user_text}]})
-    body = {
-        "system_instruction": {"parts": [{"text": build_system_prompt()}]},
-        "contents": contents,
-        "generationConfig": {
-            "temperature": 0.3,
-            "responseMimeType": "application/json",
-            "responseSchema": RESPONSE_SCHEMA,
-        },
-    }
-    headers = {"x-goog-api-key": GEMINI_API_KEY}
+    """Call Groq (OpenAI-compatible) with retry on rate limits."""
+    messages = [{"role": "system", "content": build_system_prompt()}]
+    for role, text in history:
+        messages.append({"role": role if role == "user" else "assistant", "content": text})
+    messages.append({"role": "user", "content": user_text})
 
-    if http is None:
-        raise RuntimeError("HTTP client is not initialized")
+    body = {
+        "model": GROQ_MODEL,
+        "messages": messages,
+        "temperature": 0.3,
+        "response_format": {"type": "json_object"},
+        "max_tokens": 500,
+    }
+    headers = {
+        "Authorization": f"Bearer {GROQ_API_KEY}",
+        "Content-Type": "application/json",
+    }
 
     for attempt in range(3):
-        try:
-            r = await http.post(GEMINI_URL, json=body, headers=headers)
-        except httpx.TransportError as exc:
-            if attempt == 2:
-                raise
-            wait = attempt + 1
-            log.warning("Gemini request failed (%s), retrying in %ss", type(exc).__name__, wait)
-            await asyncio.sleep(wait)
-            continue
-        if r.status_code in (429, 500, 503) and attempt < 2:
-            wait = attempt + 1
-            log.warning("Gemini returned %s, retrying in %ss", r.status_code, wait)
+        r = await http.post(GROQ_URL, json=body, headers=headers)
+        if r.status_code in (429, 500, 503):
+            wait = 2 * (attempt + 1)
+            log.warning("Groq returned %s, retrying in %ss", r.status_code, wait)
             await asyncio.sleep(wait)
             continue
         break
@@ -284,7 +277,7 @@ async def ask_gemini(history: list[tuple[str, str]], user_text: str) -> dict:
         raise RuntimeError(f"Gemini error {r.status_code}: {r.text[:300]}")
 
     data = r.json()
-    text = data["candidates"][0]["content"]["parts"][0]["text"]
+    text = data["choices"][0]["message"]["content"]
     return json.loads(text)
 
 
@@ -350,8 +343,8 @@ async def handle_update(update: dict) -> bool:
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global http
-    if not TELEGRAM_BOT_TOKEN or not GEMINI_API_KEY:
-        raise RuntimeError("Set TELEGRAM_BOT_TOKEN and GEMINI_API_KEY in your .env file")
+    if not TELEGRAM_BOT_TOKEN or not GROQ_API_KEY:
+        raise RuntimeError("Set TELEGRAM_BOT_TOKEN and GROQ_API_KEY in your .env file")
     if PUBLIC_URL and not WEBHOOK_SECRET:
         raise RuntimeError("Set WEBHOOK_SECRET when PUBLIC_URL is configured")
     if not INSTITUTE_FILE.is_file():
