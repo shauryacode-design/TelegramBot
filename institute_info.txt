@@ -1,0 +1,91 @@
+INSTITUTE INFORMATION: BRIGHTPATH ACADEMY (fictional, for practice)
+
+ABOUT
+Brightpath Academy is a coaching institute for school students (Class 6 to 12) and competitive exam foundation. Started in 2016. Small batches, weekly tests, and regular parent updates.
+
+LOCATION AND CONTACT
+Address: 2nd Floor, Main Market Road, Near City Library
+Phone / WhatsApp: 98XXXXXXXX (replace with real number)
+Email: info@brightpathacademy.example
+Office hours: Monday to Saturday, 10:00 AM to 7:00 PM. Sunday closed.
+
+COURSES AND FEES (per year, in INR)
+- Class 6 to 8 (Maths, Science, English): Rs 18,000
+- Class 9 to 10 (Maths, Science, Social Science, English): Rs 28,000
+- Class 11 to 12 Science (Physics, Chemistry, Maths or Biology): Rs 45,000
+- Class 11 to 12 Commerce (Accountancy, Business Studies, Economics): Rs 35,000
+- JEE / NEET Foundation (Class 9 to 10): Rs 40,000
+- Single subject only: Rs 8,000 to Rs 15,000 depending on class
+
+FEE PAYMENT
+- Full payment upfront: 10% discount.
+- Installments: 3 installments (at admission, after 3 months, after 6 months).
+- Payment modes: UPI, cash, bank transfer. No card payments.
+- Registration fee: Rs 500 (one time, non-refundable).
+- Sibling discount: 5% on the second child.
+
+BATCH TIMINGS
+- Class 6 to 8: Monday, Wednesday, Friday, 4:00 PM to 6:00 PM
+- Class 9 to 10: Monday to Saturday, 5:00 PM to 7:00 PM
+- Class 11 to 12: Monday to Saturday, 7:30 AM to 9:30 AM (morning batch) or 5:00 PM to 7:30 PM (evening batch)
+- Weekend test series: Sunday, 10:00 AM to 1:00 PM (for Class 9 to 12 only)
+- New batches start every April and July.
+
+BATCH SIZE AND TEACHING
+- Maximum 25 students per batch.
+- Teachers: 8 full-time subject teachers, all with at least 5 years of experience.
+- Study material (notes and practice sheets) included in the fee.
+- Doubt-clearing session: every Saturday, 3:00 PM to 4:30 PM, free for enrolled students.
+
+TESTS AND PARENT UPDATES
+- Weekly test every Saturday for each batch.
+- Monthly progress report shared with parents on WhatsApp.
+- Parent-teacher meeting once every quarter.
+- Attendance updates sent to parents daily.
+
+DEMO CLASS
+- Free demo class available before admission.
+- Demo classes run every Saturday at 11:00 AM, subject to seat availability.
+- Booking required: ask the student's name, class, and phone number.
+
+ADMISSION PROCESS
+1. Book a free demo class.
+2. Short counselling session with the academic head (15 minutes).
+3. Fill the admission form and pay the registration fee.
+4. Choose a batch and pay the first installment.
+Documents needed: previous class marksheet and one passport-size photo.
+
+RESULTS (fictional figures for practice)
+- Class 10 board results last year: 62% of students scored above 85%.
+- 14 students cleared school-level scholarship exams last year.
+- We do not guarantee marks or ranks. Results depend on the student's effort.
+
+FREQUENTLY ASKED QUESTIONS
+Q: Is online class available?
+A: Yes, for Class 11 to 12 evening batch only. Recorded lectures are shared the same day.
+
+Q: What if my child misses a class?
+A: Notes and a short recap are available at the office, and the teacher can clear doubts on Saturday.
+
+Q: Can we change batch after joining?
+A: Yes, once, within the first month, subject to seat availability.
+
+Q: Is there a refund if we leave midway?
+A: Registration fee is non-refundable. For remaining fees, a refund of unused full months is given if you inform us in writing at least 15 days before leaving.
+
+Q: Do you teach CBSE or State Board?
+A: Both CBSE and State Board syllabus are covered.
+
+Q: Do you offer a scholarship?
+A: A 20% fee concession is offered to students scoring above 90% in our entrance test. Seats are limited.
+
+Q: Can my child attend only one subject?
+A: Yes, single-subject enrollment is available. Please share the class and subject for the exact fee.
+
+Q: Is hostel or transport available?
+A: No hostel. Transport is not provided, but the centre is near the main bus stop.
+
+THINGS THE BOT SHOULD NOT DO
+- Do not promise marks, ranks, or selection.
+- Do not give discounts beyond what is listed above. For special requests, say the office team will call back.
+- If the answer is not in this file, say you are not sure and offer to arrange a call back from the office.
