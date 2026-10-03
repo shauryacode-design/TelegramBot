@@ -256,6 +256,7 @@ async def ask_gemini(history: list[tuple[str, str]], user_text: str) -> dict:
             "temperature": 0.3,
             "responseMimeType": "application/json",
             "responseSchema": RESPONSE_SCHEMA,
+            "thinkingConfig": {"thinkingBudget": 0},
         },
     }
     headers = {"x-goog-api-key": GEMINI_API_KEY}
