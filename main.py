@@ -133,9 +133,9 @@ def init_db() -> None:
                 text TEXT NOT NULL,
                 created_at TEXT NOT NULL
             );
-            CREATE INDEX IF NOT EXISTS idx_messages_chat ON messages(chat_id, id);
             CREATE TABLE IF NOT EXISTS leads (
-                chat_id INTEGER PRIMARY KEY,
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                chat_id INTEGER NOT NULL,
                 name TEXT,
                 student_class TEXT,
                 phone TEXT,
@@ -143,6 +143,7 @@ def init_db() -> None:
                 created_at TEXT NOT NULL,
                 updated_at TEXT NOT NULL
             );
+            CREATE INDEX IF NOT EXISTS idx_leads_chat ON leads(chat_id, id);
             """
         )
 
@@ -199,33 +200,48 @@ def normalize_phone(raw) -> str | None:
 
 
 def upsert_lead(chat_id: int, name, student_class, phone, tg_username: str | None):
-    """Merge new details into the lead. Returns (lead_dict_or_None, became_complete)."""
-    new = {
-        "name": clean_text(name),
-        "student_class": clean_text(student_class),
-        "phone": normalize_phone(phone),
-    }
+    new_name = clean_text(name)
+    new_class = clean_text(student_class)
+    new_phone = normalize_phone(phone)
+
+    if not any([new_name, new_class, new_phone]):
+        return None, False
+
     with db() as c:
-        row = c.execute("SELECT * FROM leads WHERE chat_id=?", (chat_id,)).fetchone()
+        row = c.execute(
+            "SELECT * FROM leads WHERE chat_id=? ORDER BY id DESC LIMIT 1",
+            (chat_id,)
+        ).fetchone()
+
         old = dict(row) if row else {}
-        merged = {k: new[k] or old.get(k) for k in new}
-        if not any(merged.values()):
-            return None, False
-        was_complete = all(old.get(k) for k in new)
-        is_complete = all(merged.values())
-        c.execute(
-            """
-            INSERT INTO leads (chat_id, name, student_class, phone, tg_username, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-            ON CONFLICT(chat_id) DO UPDATE SET
-                name=excluded.name,
-                student_class=excluded.student_class,
-                phone=excluded.phone,
-                tg_username=COALESCE(excluded.tg_username, leads.tg_username),
-                updated_at=excluded.updated_at
-            """,
-            (chat_id, merged["name"], merged["student_class"], merged["phone"], tg_username, now(), now()),
+        old_complete = bool(row and all(old.get(k) for k in ("name", "student_class", "phone")))
+
+        # Start a new lead if no existing lead, or existing is complete and name changed
+        start_new = (
+            not row or
+            (old_complete and new_name and new_name != old.get("name"))
         )
+
+        if start_new:
+            merged = {"name": new_name, "student_class": new_class, "phone": new_phone}
+            c.execute(
+                "INSERT INTO leads (chat_id, name, student_class, phone, tg_username, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                (chat_id, merged["name"], merged["student_class"], merged["phone"], tg_username, now(), now()),
+            )
+        else:
+            merged = {
+                "name": new_name or old.get("name"),
+                "student_class": new_class or old.get("student_class"),
+                "phone": new_phone or old.get("phone"),
+            }
+            c.execute(
+                "UPDATE leads SET name=?, student_class=?, phone=?, tg_username=COALESCE(?, tg_username), updated_at=? WHERE id=?",
+                (merged["name"], merged["student_class"], merged["phone"], tg_username, now(), old["id"]),
+            )
+
+        was_complete = old_complete and not start_new
+        is_complete = all(merged.values())
+
     merged["tg_username"] = tg_username or old.get("tg_username")
     return merged, (is_complete and not was_complete)
 
