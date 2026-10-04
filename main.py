@@ -350,6 +350,7 @@ async def lifespan(app: FastAPI):
     if not INSTITUTE_FILE.is_file():
         raise RuntimeError(f"Institute information file not found: {INSTITUTE_FILE}")
     init_db()
+    log.info("GROQ_MODEL is: %s", GROQ_MODEL)
     http = httpx.AsyncClient(timeout=12)
     try:
         if PUBLIC_URL:
