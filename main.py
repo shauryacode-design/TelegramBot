@@ -80,6 +80,10 @@ RULES
 
 INSTITUTE INFORMATION
 {load_institute_info()}
+CRITICAL OUTPUT RULE: You MUST reply ONLY with a valid JSON object. No text before or after it. No explanation. No markdown. Just the raw JSON.
+Always use this exact format:
+{{"reply": "your message to the student", "name": null, "student_class": null, "phone": null}}
+Fill name, student_class, phone only if the user stated them in this conversation. Otherwise keep them null.
 """
 
 
@@ -277,8 +281,13 @@ async def ask_groq(history: list[tuple[str, str]], user_text: str) -> dict:
         raise RuntimeError(f"Groq error {r.status_code}: {r.text[:300]}")
 
     data = r.json()
-    text = data["choices"][0]["message"]["content"]
-    return json.loads(text)
+    text = data["choices"][0]["message"]["content"].strip()
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError:
+        # Model ignored JSON instruction, extract plain text as reply
+        log.warning("Model returned plain text instead of JSON, wrapping it")
+        return {"reply": text, "name": None, "student_class": None, "phone": None}
 
 
 # ----------------------------------------------------------------------------
