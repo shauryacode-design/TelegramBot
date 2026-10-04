@@ -162,7 +162,7 @@ def get_history(chat_id: int) -> list[tuple[str, str]]:
             (chat_id, HISTORY_LIMIT),
         ).fetchall()
     history = [(r["role"], r["text"]) for r in reversed(rows)]
-    while history and history[0][0] != "user":  # Gemini history should start with a user turn
+    while history and history[0][0] != "user":  # Keep the first message as a user turn.
         history.pop(0)
     return history
 
@@ -233,7 +233,7 @@ def all_leads() -> list[dict]:
 
 
 # ----------------------------------------------------------------------------
-# Telegram + Gemini helpers
+# Telegram + Groq helpers
 # ----------------------------------------------------------------------------
 
 
@@ -245,7 +245,7 @@ async def send_telegram(chat_id, text: str) -> None:
         raise RuntimeError(f"Telegram sendMessage failed with HTTP {r.status_code}")
 
 
-async def ask_gemini(history: list[tuple[str, str]], user_text: str) -> dict:
+async def ask_groq(history: list[tuple[str, str]], user_text: str) -> dict:
     """Call Groq (OpenAI-compatible) with retry on rate limits."""
     messages = [{"role": "system", "content": build_system_prompt()}]
     for role, text in history:
@@ -274,7 +274,7 @@ async def ask_gemini(history: list[tuple[str, str]], user_text: str) -> dict:
         break
 
     if r.status_code != 200:
-        raise RuntimeError(f"Gemini error {r.status_code}: {r.text[:300]}")
+        raise RuntimeError(f"Groq error {r.status_code}: {r.text[:300]}")
 
     data = r.json()
     text = data["choices"][0]["message"]["content"]
@@ -303,9 +303,9 @@ async def handle_update(update: dict) -> bool:
             return True
 
         try:
-            result = await ask_gemini(get_history(chat_id), text)
+            result = await ask_groq(get_history(chat_id), text)
         except Exception:
-            log.exception("Gemini call failed")
+            log.exception("Groq call failed")
             await send_telegram(chat_id, FALLBACK_REPLY)
             return True
 

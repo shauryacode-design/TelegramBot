@@ -1,4 +1,4 @@
-# Coaching Institute Enquiry Bot (Telegram + FastAPI + Gemini)
+# Coaching Institute Enquiry Bot (Telegram + FastAPI + Groq)
 
 Answers parents' and students' questions from `institute_info.txt`, remembers the
 conversation, collects name / class / phone, and gives the owner a leads page.
@@ -12,7 +12,7 @@ conversation, collects name / class / phone, and gives the owner a leads page.
    pip install -r requirements.txt
    ```
 2. Copy `env.example` to `.env` and fill in the values
-   (Telegram token from @BotFather, Gemini key from Google AI Studio).
+   (Telegram token from @BotFather and `GROQ_API_KEY` from Groq).
 3. Start a tunnel so Telegram can reach your laptop (in a second terminal):
    ```
    ngrok http 8000
@@ -39,8 +39,10 @@ restart the app each time.
 
 - Open `https://api.telegram.org/bot<TOKEN>/getWebhookInfo` and read `last_error_message`.
 - Check the uvicorn terminal for errors.
-- "Gemini error 429": you hit the free-tier rate limit. Wait a minute or check your quota.
-- "Gemini error 404": the model name in `GEMINI_MODEL` is wrong or retired.
+- "Groq error 429": the Groq rate limit was reached. Wait a minute or check your quota.
+- "Groq error 404" with `model_not_found`: check that `GROQ_MODEL` in your Render
+  environment is a model currently available to your Groq account. If it is set to
+  `llama-3.1-8b-instant`, replace it with a currently supported model and redeploy.
 
 ## Files
 
