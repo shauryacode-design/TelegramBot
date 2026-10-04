@@ -117,10 +117,13 @@ def db():
 def now() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
 
-
 def init_db() -> None:
-    Path(DB_PATH).parent.mkdir(parents=True, exist_ok=True)
     with db() as c:
+        # Migration: drop old leads table if it uses chat_id as primary key (no id column)
+        try:
+            c.execute("SELECT id FROM leads LIMIT 1")
+        except sqlite3.OperationalError:
+            c.execute("DROP TABLE IF EXISTS leads")
         c.executescript(
             """
             CREATE TABLE IF NOT EXISTS processed_updates (
