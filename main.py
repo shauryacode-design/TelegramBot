@@ -1,6 +1,6 @@
-"""Coaching-institute enquiry bot: Telegram + FastAPI + Gemini + SQLite.
+"""Coaching-institute enquiry bot: Telegram + FastAPI + Groq + SQLite.
 
-Flow: Telegram -> POST /webhook -> (background) Gemini -> reply via Telegram,
+Flow: Telegram -> POST /webhook -> (background) Groq -> reply via Telegram,
 and any name/class/phone the user gives is saved as a lead in SQLite.
 """
 import asyncio
